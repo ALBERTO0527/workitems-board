@@ -12,7 +12,7 @@ export function titleOf(markdown, fallback) {
 }
 
 export default function StreamPage({ repo, stream, projectPath, file }) {
-  const { client, project, paths } = repo
+  const { project, paths } = repo
   const ref = project.default_branch
   const blobBase = `${project.web_url}/-/blob/${ref}/`
   const [titles, setTitles] = useState({})
@@ -23,22 +23,24 @@ export default function StreamPage({ repo, stream, projectPath, file }) {
   const selected = file && paths.has(file) ? file
     : stream.docs.find(d => /\/PIANO-.*\.md$/.test(d)) ?? stream.docs.find(d => d.endsWith('/README.md')) ?? stream.items[0]?.path ?? null
 
+  const itemPaths = stream.items.map(i => i.path).join('\n') // stabile tra un reload e l'altro
   useEffect(() => {
     let alive = true
-    Promise.all(stream.items.map(async i => [i.path, titleOf((await client.getFile(project.id, i.path, ref)).content, i.file)]))
+    Promise.all(stream.items.map(async i => [i.path, titleOf(await repo.readFile(i.path), i.file)]))
       .then(entries => alive && setTitles(Object.fromEntries(entries)))
       .catch(e => alive && repo.report(e, setError))
     return () => { alive = false }
-  }, [client, project.id, ref, stream.items])
+  }, [itemPaths])
 
   useEffect(() => {
     if (!selected?.endsWith('.md')) return
     let alive = true
-    client.getFile(project.id, selected, ref)
-      .then(f => alive && setDoc({ path: selected, text: f.content }))
+    setError(null)
+    repo.readFile(selected)
+      .then(text => alive && setDoc({ path: selected, text }))
       .catch(e => alive && repo.report(e, setError))
     return () => { alive = false }
-  }, [client, project.id, ref, selected])
+  }, [selected])
 
   const linkTo = path => routeTo(projectPath, path.split('/')[0], path)
   const openItems = stream.items.filter(i => !i.done)

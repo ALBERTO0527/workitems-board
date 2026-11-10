@@ -34,7 +34,7 @@ export default function Board({ repo, projectPath, onSignOut }) {
     <div className="board">
       <header>
         <strong>{projectPath}</strong>
-        <button onClick={() => run(repo.reload())} disabled={repo.busy}>Aggiorna</button>
+        <button onClick={() => run(repo.refresh())} disabled={repo.busy}>Aggiorna</button>
         <a href="#/" onClick={() => localStorage.removeItem('wib.project')}>Cambia progetto</a>
         <span className="spacer" />
         {repo.user && <span title={repo.user.name}>@{repo.user.username}</span>}

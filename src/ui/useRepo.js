@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ConflictError, createClient } from '../gitlab/api.js'
 import { getToken } from '../gitlab/auth.js'
 import { columnOf, parseKanban, serializeKanban } from '../repo/kanban.js'
@@ -9,6 +9,7 @@ export function useRepo(projectPath) {
   const [state, setState] = useState({ status: 'loading' })
   const [busy, setBusy] = useState(false)
   const [user, setUser] = useState(null)
+  const files = useRef(new Map())
 
   const reload = useCallback(async () => {
     try {
@@ -63,6 +64,21 @@ export function useRepo(projectPath) {
     }
   }
 
+  // .md letti dalla pagina stream: la board scrive solo kanban.md, quindi restano validi fino ad "Aggiorna"
+  function readFile(path) {
+    if (!files.current.has(path)) {
+      const { id, default_branch } = state.project
+      files.current.set(path, client.getFile(id, path, default_branch).then(f => f.content)
+        .catch(e => { files.current.delete(path); throw e }))
+    }
+    return files.current.get(path)
+  }
+
+  function refresh() {
+    files.current.clear()
+    return reload()
+  }
+
   function assign(stream, username) {
     const message = username ? `board: ${stream.name} assegnato a ${username}` : `board: ${stream.name} non assegnato`
     return save([{ name: stream.name, kanban: { ...stream.kanban, assegnato: username || null } }], message)
@@ -74,5 +90,5 @@ export function useRepo(projectPath) {
     else setLocalError(e.message)
   }
 
-  return { ...state, busy, user, client, reload, retry, save, assign, report }
+  return { ...state, busy, user, client, reload, refresh, retry, readFile, save, assign, report }
 }
