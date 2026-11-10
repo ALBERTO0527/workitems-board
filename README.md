@@ -1,84 +1,89 @@
 # workitems-board
 
-Kanban web per i work item scritti come file `.md` in un repo GitLab. Pensata per team che lavorano
-con agenti AI (Claude Code e simili): gli item restano file nel repo, la board è solo un modo di
-guardarli e pianificarli.
+A web kanban for work items written as `.md` files in a GitLab repo. Built for teams that work with
+AI agents (Claude Code and the like): the items stay files in the repo, and the board is just a way
+to look at them and plan them.
 
-- Nessun server e nessun database: la pagina parla direttamente con l'API di GitLab.com dal tuo browser.
-- Il repo resta l'unica fonte di verità. La board scrive un solo tipo di file, `kanban.md`, e solo
-  quando sposti o assegni qualcosa. Ogni azione è un commit.
+- No server and no database: the page talks straight to the GitLab.com API from your browser.
+- The repo stays the single source of truth. The board writes only one kind of file, `kanban.md`,
+  and only when you move or assign something. Every action is a commit.
 
-## Come deve essere fatto il repo
+Try it at https://workitems-board-99a740.gitlab.io/ with any GitLab.com repo you can access.
+The interface is in Italian.
+
+## How the repo must be laid out
 
 ```
-nome-stream/                 ← uno stream = una cartella al primo livello
-  PIANO-NOME-STREAM.md       ← documenti dello stream (piani, README, note, csv…)
-  A01-prima-cosa.md          ← item aperto
-  A02-seconda-cosa.md
+stream-name/                 ← a stream = a top-level folder
+  PIANO-STREAM-NAME.md       ← stream documents (plans, README, notes, csv…)
+  A01-first-thing.md         ← open item
+  A02-second-thing.md
   done/
-    A00-gia-fatto.md         ← item chiuso
-  kanban.md                  ← creato dalla board
+    A00-already-done.md      ← closed item
+  kanban.md                  ← created by the board
 ```
 
-- **Stream**: cartella al primo livello che contiene almeno un item, un `PIANO-*.md` o un `README.md`.
-- **Item**: file il cui nome inizia con una lettera maiuscola e almeno due cifre, poi `-`
-  (`A01-…md`, `W100-…md`). È aperto se sta nella cartella dello stream, chiuso se sta in `done/`.
-  Un file è un item.
-- Gli altri file della cartella sono documenti dello stream. Le sottocartelle diverse da `done/` si ignorano.
+- **Stream**: a top-level folder that contains at least one item, a `PIANO-*.md` or a `README.md`.
+- **Item**: a file whose name starts with an uppercase letter and at least two digits, then `-`
+  (`A01-…md`, `W100-…md`). It is open if it sits in the stream folder, closed if it sits in `done/`.
+  One file is one item.
+- The other files in the folder are stream documents. Subfolders other than `done/` are ignored.
 
-### Colonne
+### Columns
 
-| Colonna | Quando |
+| Column | When |
 |---|---|
-| **Chiusi** | lo stream ha almeno un item e sono tutti in `done/` (calcolato) |
-| **In corso** | `kanban.md` dice `stato: in-corso` (lo stream è stato trascinato lì) |
-| **Da fare** | tutti gli altri casi, anche senza `kanban.md` |
+| **Chiusi** (closed) | the stream has at least one item and all of them are in `done/` (computed) |
+| **In corso** (in progress) | `kanban.md` says `stato: in-corso` (the stream was dragged there) |
+| **Da fare** (to do) | every other case, including streams without `kanban.md` |
 
-Uno stream chiuso che riceve nuovi item torna nella colonna scritta nel suo `kanban.md`.
+A closed stream that gets new items goes back to the column written in its `kanban.md`.
 
 ### `kanban.md`
 
 ```markdown
 ---
 stato: in-corso          # da-fare | in-corso
-assegnato: username      # username GitLab, oppure vuoto
-ordine: 1500             # posizione nella colonna
+assegnato: username      # GitLab username, or empty
+ordine: 1500             # position in the column
 ---
 File gestito da workitems-board. Modificalo dalla board.
 ```
 
-## Login e permessi
+The keys and values are in Italian: `stato` is the status, `assegnato` the assignee, `ordine` the order.
 
-Si entra con GitLab (OAuth con PKCE, nessun segreto lato server). GitLab chiede lo scope `api`,
-l'unico che permette di fare commit dall'API: **dà accesso a tutti i repo del tuo account**. Il token
-resta nel `localStorage` del tuo browser e va solo a `gitlab.com`; il codice è tutto qui per
-controllarlo. Chi non può fare push sul branch principale del repo vede la board ma riceve un errore
-quando prova a spostare qualcosa.
+## Login and permissions
 
-## Sviluppo
+You sign in with GitLab (OAuth with PKCE, no server-side secret). GitLab asks for the `api` scope,
+the only one that allows commits through the API: **it gives access to every repo of your account**.
+The token stays in your browser's `localStorage` and only goes to `gitlab.com`; all the code is here
+for you to check. People who cannot push to the repo's default branch see the board but get an error
+when they try to move something.
+
+## Development
 
 ```bash
-cp .env.example .env   # e metti il client id dell'app OAuth
+cp .env.example .env   # and put the OAuth app client id in it
 npm install
 npm run dev            # http://localhost:5173/
 npm test
 ```
 
-## Pubblicare una tua istanza
+## Publishing your own instance
 
-1. Fai un fork del repo.
-2. Su GitLab, *Preferenze → Applicazioni*: crea un'app con **Confidential: no**, scope `api` e come
-   redirect URI `http://localhost:5173/` più l'indirizzo della pagina pubblicata (una riga ciascuno,
-   con la barra finale).
+1. Fork the repo.
+2. On GitLab, *Preferences → Applications*: create an app with **Confidential: no**, scope `api` and
+   as redirect URIs `http://localhost:5173/` plus the address of the published page (one per line,
+   with the trailing slash).
 
-**Su GitLab Pages** (`.gitlab-ci.yml`): metti il tuo Application ID in `VITE_GITLAB_CLIENT_ID` dentro
-`.gitlab-ci.yml`. Ogni push su `main` pubblica la pagina; l'indirizzo è in *Deploy → Pages*. Se il
-progetto è privato, imposta *Settings → General → Visibility → Pages* su "Everyone".
+**On GitLab Pages** (`.gitlab-ci.yml`): put your Application ID in `VITE_GITLAB_CLIENT_ID` inside
+`.gitlab-ci.yml`. Every push to `main` publishes the page; the address is under *Deploy → Pages*. If
+the project is private, set *Settings → General → Visibility → Pages* to "Everyone".
 
-**Su GitHub Pages** (`.github/workflows/pages.yml`, solo repo pubblici): in *Settings → Secrets and
-variables → Actions → Variables* aggiungi `VITE_GITLAB_CLIENT_ID`, poi *Settings → Pages → Source:
-GitHub Actions*. Senza la variabile il workflow non parte.
+**On GitHub Pages** (`.github/workflows/pages.yml`, public repos only): under *Settings → Secrets and
+variables → Actions → Variables* add `VITE_GITLAB_CLIENT_ID`, then *Settings → Pages → Source:
+GitHub Actions*. Without the variable the workflow does not run.
 
-## Licenza
+## License
 
 MIT
