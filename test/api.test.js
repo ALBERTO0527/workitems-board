@@ -79,3 +79,19 @@ test('401 means the token is no longer valid: ask for login', async () => {
   const { fetch } = fakeFetch([{ status: 401, body: { message: '401 Unauthorized' } }])
   await expect(client(fetch).getUser()).rejects.toThrow('login')
 })
+
+test('listProjects returns my most recently active projects, optionally searched', async () => {
+  const project = { path_with_namespace: 'acme/workitems', name: 'workitems', namespace: { full_path: 'acme' }, last_activity_at: '2026-11-09T10:00:00Z', extra: 1 }
+  const { fetch, calls } = fakeFetch([{ body: [project] }, { body: [] }])
+  const c = client(fetch)
+  expect(await c.listProjects('')).toEqual([{ path: 'acme/workitems', name: 'workitems', namespace: 'acme', activity: '2026-11-09T10:00:00Z' }])
+  const url = new URL(calls[0].url)
+  expect(url.searchParams.get('membership')).toBe('true')
+  expect(url.searchParams.get('order_by')).toBe('last_activity_at')
+  expect(url.searchParams.get('active')).toBe('true') // niente archiviati o in cancellazione
+  expect(url.searchParams.has('search')).toBe(false)
+  await c.listProjects('acme work')
+  const searched = new URL(calls[1].url)
+  expect(searched.searchParams.get('search')).toBe('acme work')
+  expect(searched.searchParams.get('search_namespaces')).toBe('true')
+})

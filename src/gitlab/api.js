@@ -37,6 +37,14 @@ export function createClient({ getToken, fetch = globalThis.fetch, base = 'https
       const { id, default_branch, web_url } = (await request(`/projects/${enc(pathWithNamespace)}`)).body
       return { id, default_branch, web_url }
     },
+    // ponytail: solo i primi 20, la ricerca copre il resto
+    listProjects: async search => {
+      const q = new URLSearchParams({ membership: 'true', active: 'true', simple: 'true', order_by: 'last_activity_at', per_page: '20' })
+      if (search) q.set('search', search), q.set('search_namespaces', 'true')
+      return (await request(`/projects?${q}`)).body.map(p => ({
+        path: p.path_with_namespace, name: p.name, namespace: p.namespace.full_path, activity: p.last_activity_at,
+      }))
+    },
     listTree: async (id, ref) =>
       (await all(`/projects/${id}/repository/tree?recursive=true&ref=${enc(ref)}`))
         .filter(e => e.type === 'blob')
