@@ -9,7 +9,7 @@ test('missing kanban.md means da-fare, unassigned, no order', () => {
 
 test('reads the three frontmatter fields', () => {
   expect(parseKanban('---\nstato: in-corso\nassegnato: albertotonni\nordine: 1500\n---\nx'))
-    .toEqual({ stato: 'in-corso', assegnato: 'albertotonni', ordine: 1500 })
+    .toMatchObject({ stato: 'in-corso', assegnato: 'albertotonni', ordine: 1500 })
 })
 
 test('malformed kanban.md falls back to defaults', () => {
@@ -56,4 +56,10 @@ test('serialize leaves ordine empty when the stream has none', () => {
 test('Windows line endings and BOM are read like normal files', () => {
   expect(parseKanban('﻿---\r\nstato: in-corso\r\nassegnato: mario\r\nordine: 10\r\n---\r\n'))
     .toEqual({ stato: 'in-corso', assegnato: 'mario', ordine: 10 })
+})
+
+test('fields and notes added by hand survive a board write', () => {
+  const text = '---\nstato: in-corso\nassegnato: mario\npriorita: alta\nordine: 10\nscadenza: 2026-12-01\n---\nNote del team.\n'
+  expect(serializeKanban({ ...parseKanban(text), assegnato: 'anna' }))
+    .toBe('---\nstato: in-corso\nassegnato: anna\nordine: 10\npriorita: alta\nscadenza: 2026-12-01\n---\nNote del team.\n')
 })

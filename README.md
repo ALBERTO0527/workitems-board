@@ -8,6 +8,8 @@ to look at them and plan them.
 - The repo stays the single source of truth. The board writes only one kind of file, `kanban.md`,
   and only when you move or assign something. Every action is a commit.
 
+Developed at [SaluteGo](https://salutego.it) by Alberto Tonni and given to the community under the MIT license.
+
 Try it at https://workitems-board-99a740.gitlab.io/ with any GitLab.com repo you can access.
 The interface is in Italian.
 
@@ -51,6 +53,7 @@ File gestito da workitems-board. Modificalo dalla board.
 ```
 
 The keys and values are in Italian: `stato` is the status, `assegnato` the assignee, `ordine` the order.
+You can add other fields or notes by hand: the board keeps them when it rewrites the file.
 
 ## Login and permissions
 
