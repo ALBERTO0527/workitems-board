@@ -77,7 +77,7 @@ progetto è privato, imposta *Settings → General → Visibility → Pages* su 
 
 **Su GitHub Pages** (`.github/workflows/pages.yml`, solo repo pubblici): in *Settings → Secrets and
 variables → Actions → Variables* aggiungi `VITE_GITLAB_CLIENT_ID`, poi *Settings → Pages → Source:
-GitHub Actions*.
+GitHub Actions*. Senza la variabile il workflow non parte.
 
 ## Licenza
 

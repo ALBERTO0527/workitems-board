@@ -15,7 +15,8 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ !github.event.repository.private }}
+    # parte solo quando il fork ha configurato il client id (vedi README)
+    if: ${{ vars.VITE_GITLAB_CLIENT_ID != '' }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
