@@ -1,0 +1,19 @@
+# Test, build e pubblicazione su GitLab Pages a ogni push su main.
+pages:
+  image: node:22
+  variables:
+    # Application ID dell'app OAuth su GitLab (non è segreto). Chi fa un fork mette il proprio.
+    VITE_GITLAB_CLIENT_ID: 83fb16738ac2c7186bd901f309024a34eba8229d5e8fa6a205425d611ff8f91e
+  cache:
+    key:
+      files: [package-lock.json]
+    paths: [.npm/]
+  script:
+    - npm ci --cache .npm --prefer-offline
+    - npm test
+    - npm run build
+    - rm -rf public && mv dist public
+  artifacts:
+    paths: [public]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

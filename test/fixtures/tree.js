@@ -1,0 +1,23 @@
+// Albero sintetico con le forme del repo vero: stream normali, solo piano, tutto chiuso,
+// codici ripetuti, sottocartelle da ignorare, cartelle che non sono stream.
+export const TREE = [
+  'README.md',
+  'alpha/PIANO-ALPHA.md',
+  'alpha/A01-uno.md',
+  'alpha/A02-due.md',
+  'alpha/done/A03-tre.md',
+  'alpha/kanban.md',
+  'beta/README.md',
+  'beta/B01-x.md',
+  'beta/B01-bis-y.md',
+  'beta/notes.csv',
+  'beta/archivio/B09-vecchio.md',
+  'beta/sub/done/B10-z.md',
+  'gamma/PIANO-GAMMA.md',
+  'delta/done/D01-a.md',
+  'delta/done/D02-b.md',
+  'epsilon/E01-aperto.md',
+  'epsilon/done/E01-chiuso.md',
+  'promemoria/NOTE.md',
+  'legal docs/01-clausola.md',
+]
